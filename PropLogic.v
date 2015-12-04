@@ -45,3 +45,60 @@ Section Def.
 
 End Def.
 
+Lemma eval_exclusive : forall t (f : formula t) (I : Assignment t), ~(eval t f I true /\ eval t f I false).
+Proof.
+  intros t f I.
+  induction f.
+  {
+    intro H.
+    destruct H as [Ht Hf].
+    destruct I as [R P].
+    inversion Ht; subst.
+    inversion Hf; subst.
+    set (P t0) as H.
+    destruct H as [x H].
+    unfold unique in H.
+    destruct H as [HRx Heq].
+    apply Heq in H0.
+    apply Heq in H1.
+    congruence.
+  } {
+    intro H; apply IHf.
+    destruct H as [Ht Hf].
+    inversion Ht; subst; inversion Hf; subst.
+    rewrite H0, H1.
+    apply negb_true_iff in H0.
+    apply negb_false_iff in H1.
+    subst.
+    auto.
+  } {
+    intro H.
+    destruct H as [Ht Hf].
+    inversion Ht; subst.
+    inversion Hf; subst.
+    apply andb_true_iff in H1.
+    destruct H1; subst.
+    apply andb_false_iff in H2.
+    destruct H2; subst; auto.
+  } {
+    intro H.
+    destruct H as [Ht Hf].
+    inversion Ht; subst.
+    inversion Hf; subst.
+    apply orb_false_iff in H2.
+    destruct H2; subst; auto.
+    apply orb_true_iff in H1.
+    destruct H1; subst; auto.
+  } {
+    intro H.
+    destruct H as [Ht Hf].
+    inversion Ht; subst.
+    inversion Hf; subst.
+    apply orb_false_iff in H2.
+    rewrite negb_false_iff in H2.
+    destruct H2; subst.
+    apply orb_true_iff in H1.
+    auto.
+  }
+Qed.
+
