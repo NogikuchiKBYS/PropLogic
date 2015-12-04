@@ -31,10 +31,10 @@ Section Def.
   Inductive eval : formula -> Assignment -> bool -> Prop :=
   | eval_var v (A : Assignment) b : A v b -> eval (fVar v) A b
   | eval_not f A b : eval f A b -> eval (fNot f) A (negb b)
-  | eval_and f1 f2 A b1 b2 : eval f1  A b1 -> eval f1 A b2 -> eval (fAnd f1 f2) A (andb b1 b2)
-  | eval_or f1 f2 A b1 b2 : eval f1  A b1 -> eval f1 A b2 -> eval (fOr f1 f2) A (orb b1 b2)
+  | eval_and f1 f2 A b1 b2 : eval f1 A b1 -> eval f2 A b2 -> eval (fAnd f1 f2) A (andb b1 b2)
+  | eval_or f1 f2 A b1 b2 : eval f1 A b1 -> eval f2 A b2 -> eval (fOr f1 f2) A (orb b1 b2)
   | eval_impl f1 f2 A b1 b2 :
-      eval f1  A b1 -> eval f1 A b2 -> eval (fImpl f1 f2) A (orb (negb b1) b2).
+      eval f1 A b1 -> eval f2 A b2 -> eval (fImpl f1 f2) A (orb (negb b1) b2).
 
   Definition Satisfiable (T : Ensemble formula) : Prop :=
     exists I, forall f, In _ T f -> eval f I true.
