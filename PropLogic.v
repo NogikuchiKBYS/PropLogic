@@ -5,6 +5,8 @@ Require Import Powerset_facts.
 Require Import Bool.
 Require Import SetoidClass.
 
+Set Implicit Arguments.
+
 Section Def.
   Variable t : Type. (* Prop Variable Type *)
 
@@ -18,7 +20,7 @@ Section Def.
   Record Assignment :=
     {
       R :> t -> bool -> Prop;
-      P : forall v, exists! b, R v b
+      Pexuniq : forall v, exists! b, R v b
     }.
 
   Definition fun_to_assignment (f : t -> bool) : Assignment.
@@ -41,64 +43,47 @@ Section Def.
 
   Definition Finite_Satisfiable (T : Ensemble formula) : Prop :=
     (forall T', Finite _ T' -> Included _ T' T -> Satisfiable T').
-
-
 End Def.
 
-Lemma eval_exclusive : forall t (f : formula t) (I : Assignment t), ~(eval t f I true /\ eval t f I false).
+Lemma eval_exclusive : forall t (f : formula t) (I : Assignment t) b1 b2,
+                         eval f I b1 -> eval f I b2 -> b1 = b2.
 Proof.
-  intros t f I.
-  induction f.
+  intros t f I b1 b2 He1.
+  generalize b2 as b; clear b2.
+  induction He1; intros b' H'.
   {
-    intro H.
-    destruct H as [Ht Hf].
-    destruct I as [R P].
-    inversion Ht; subst.
-    inversion Hf; subst.
-    set (P t0) as H.
-    destruct H as [x H].
-    unfold unique in H.
-    destruct H as [HRx Heq].
-    apply Heq in H0.
-    apply Heq in H1.
-    congruence.
+    inversion H'; subst.
+    set (Pexuniq A) as exuniq.
+    specialize (exuniq v).
+    destruct exuniq as [b0 Hb0].
+    destruct Hb0 as [Hb0 Huniq].
+    apply Huniq in H.
+    apply Huniq in H1; subst.
+    assumption.
   } {
-    intro H; apply IHf.
-    destruct H as [Ht Hf].
-    inversion Ht; subst; inversion Hf; subst.
-    rewrite H0, H1.
-    apply negb_true_iff in H0.
-    apply negb_false_iff in H1.
-    subst.
-    auto.
+    inversion H'; subst.
+    rewrite (IHHe1 b0); auto.
   } {
-    intro H.
-    destruct H as [Ht Hf].
-    inversion Ht; subst.
-    inversion Hf; subst.
-    apply andb_true_iff in H1.
-    destruct H1; subst.
-    apply andb_false_iff in H2.
-    destruct H2; subst; auto.
+    inversion H'; subst.
+    rewrite (IHHe1_1 b0); auto.
+    rewrite (IHHe1_2 b3); auto.
   } {
-    intro H.
-    destruct H as [Ht Hf].
-    inversion Ht; subst.
-    inversion Hf; subst.
-    apply orb_false_iff in H2.
-    destruct H2; subst; auto.
-    apply orb_true_iff in H1.
-    destruct H1; subst; auto.
+    inversion H'; subst.
+    rewrite (IHHe1_1 b0); auto.
+    rewrite (IHHe1_2 b3); auto.
   } {
-    intro H.
-    destruct H as [Ht Hf].
-    inversion Ht; subst.
-    inversion Hf; subst.
-    apply orb_false_iff in H2.
-    rewrite negb_false_iff in H2.
-    destruct H2; subst.
-    apply orb_true_iff in H1.
-    auto.
+    inversion H'; subst.
+    rewrite (IHHe1_1 b0); auto.
+    rewrite (IHHe1_2 b3); auto.
   }
 Qed.
 
+Lemma eval_exclusive' : forall t (f : formula t) I, ~(eval f I true /\ eval f I false).
+Proof.
+  intros.
+  intro H.
+  destruct H as [Ht Hf].
+  apply diff_true_false.
+  rewrite (eval_exclusive Ht Hf).
+  reflexivity.
+Qed.
