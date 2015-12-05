@@ -87,3 +87,41 @@ Proof.
   rewrite (eval_exclusive Ht Hf).
   reflexivity.
 Qed.
+
+Lemma eval_exist : forall t (f : formula t) (I : Assignment t), eval f I true \/ eval f I false.
+Proof.
+  intros t f I.
+  induction f.
+  {
+    destruct I as [R P].
+    set (P t0) as H.
+    destruct H as [b H].
+    case_eq b; intro; subst; [left | right]; constructor; apply H.
+  } {
+    destruct IHf; [right | left]; rewrite <- negb_involutive; constructor; auto.
+  } {
+    destruct IHf1; destruct IHf2; [left | right | right | right];
+    [
+      replace true with (true && true) |
+      replace false with (true && false) |
+      replace false with (false && true) |
+      replace false with (false && false)
+    ]; constructor; auto.
+   } {
+    destruct IHf1; destruct IHf2; [left | left | left | right];
+    [
+      replace true with (true || true) |
+      replace true with (true || false) |
+      replace true with (false || true) |
+      replace false with (false || false)
+    ]; constructor; auto.
+  } {
+    destruct IHf1; destruct IHf2; [left | right | left | left];
+    [
+      replace true with (negb true || true) |
+      replace false with (negb true || false) |
+      replace true with (negb  false || true) |
+      replace true with (negb false || false)
+    ]; constructor; auto.
+  }
+Qed.
