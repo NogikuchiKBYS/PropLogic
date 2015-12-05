@@ -45,6 +45,21 @@ Section Def.
     (forall T', Finite _ T' -> Included _ T' T -> Satisfiable T').
 End Def.
 
+Lemma Finite_Satis_FiniteSatis : forall t (T : Ensemble (formula t)),
+                             Finite _ T -> Satisfiable T -> Finite_Satisfiable T.
+Proof.
+  intros t T Hf Hs.
+  destruct Hs as [I HI].
+  intros T' _ Hincl.
+  exists I.
+  intro f.
+  specialize (HI f).
+  intro Hin.
+  apply HI.
+  apply Hincl.
+  apply Hin.
+Qed.
+
 Lemma eval_exclusive : forall t (f : formula t) (I : Assignment t) b1 b2,
                          eval f I b1 -> eval f I b2 -> b1 = b2.
 Proof.
