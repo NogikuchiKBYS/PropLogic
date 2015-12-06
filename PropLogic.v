@@ -1,11 +1,18 @@
 Require Import Classical Logic.
 Require Import Ensembles.
 Require Import Finite_sets.
+Require Import Finite_sets_facts.
 Require Import Powerset_facts.
 Require Import Bool.
 Require Import SetoidClass.
 
 Set Implicit Arguments.
+
+Lemma Included_trans : forall U A B C, Included U A B -> Included U B C -> Included U A C.
+Proof.
+  unfold Included.
+  auto.
+Qed.
 
 Section Def.
   Variable t : Type. (* Prop Variable Type *)
@@ -140,3 +147,33 @@ Proof.
     ]; constructor; auto.
   }
 Qed.
+
+Lemma Add_intro : forall U (A : Ensemble U) (x y : U), In U A y \/ x = y -> In U (Add U A x) y.
+Proof.
+  intros.
+  destruct H.
+  {
+    apply Add_intro1.
+    assumption.
+  } {
+    subst.
+    apply Add_intro2.
+  }
+Qed.
+
+Lemma Subtract_in_iff : forall U A x y, In U (Subtract U A x) y <-> In U A y /\ x <> y.
+Proof.
+  intros.
+  split; intro H.
+  {
+    apply Subtract_inv in H.
+    assumption.
+  } {
+    destruct H as [Hin Hne].
+    constructor; auto.
+    intro Hs.
+    inversion Hs.
+    congruence.
+  }
+Qed.
+
